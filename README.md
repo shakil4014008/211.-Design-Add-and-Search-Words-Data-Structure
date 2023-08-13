@@ -1,94 +1,49 @@
 # 211.-Design-Add-and-Search-Words-Data-Structure
 
 
-`````C#
-Problem: Design a data structure that supports adding new words and finding if a string matches 
-any previously added string.
+`````py
+class WordDictionary:
+    class TrieNode:
+        def __init__(self):
+            self.children = {}
+            self.endofword = False
 
-Implement the WordDictionary class:
+    def __init__(self):
+        self.root = self.TrieNode()
 
-WordDictionary() Initializes the object.
-void addWord(word) Adds word to the data structure, it can be matched later.
-bool search(word) Returns true if there is any string in the data structure that matches 
-word or false otherwise. word may contain dots '.' where dots can be matched with any letter.
+    def addWord(self, word: str) -> None:
+        cur = self.root 
+        for ch in word:
+            if ch in cur.children:
+                cur = cur.children[ch]
+            else:
+                node = self.TrieNode()
+                cur.children[ch] = node
+                cur = node 
+        cur.endofword  = True 
 
-code: 
+    def search(self, word: str) -> bool:
+        return self.search_rec(word, self.root, 0)
 
-   public class WordDictionary
-    {
-        private TrieNode root;
-        public WordDictionary()
-        {
-            root = new TrieNode(); 
-        }
+    def search_rec(self, word:str, root:TrieNode, position: int) -> bool:
+        if position == len(word):
+            return root.endofword
+        cur = root
+        flag = False 
 
-        /** Adds a word into the data structure. */
-        public void AddWord(string word)
-        {
-            char[] wordArr = word.ToCharArray();
-            TrieNode currNode = root;
+        # without this keyError p will throw
+        if word[position] != '.' and word[position] not in cur.children:
+            return False 
 
-            foreach(char character in wordArr)
-            {
-                int index = character - 'a';
-                if(currNode.Children[index] == null)
-                {
-                    currNode.Children[index] = new TrieNode();
-                }
-                currNode = currNode.Children[index];
-            }
-            currNode.IsEndWord = true;
-        }
+        if word[position] != '.':
+            return self.search_rec(word, cur.children[word[position]], position+1)
+        else:
+            for c in cur.children:
+                flag = flag or self.search_rec(word, cur.children[c], position+1)
+            return flag 
 
-        /** Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. */
-        public bool Search(string word)
-        {
-            return Helper(word.ToCharArray(), 0, root);
-        }
-
-        private bool Helper(char[] wordCharArr, int startIdx, TrieNode currNode)
-        {
-            for (int i = startIdx; i< wordCharArr.Length; i++)
-            {
-                char currChar = wordCharArr[i];
-
-                if(currChar == '.')
-                {
-                    for (int j=0; j< currNode.Children.Length; j++)
-                    {
-                        if(currNode.Children[j] != null &&
-                            Helper(wordCharArr, i+1, currNode.Children[j]))
-                        {
-                            return true;
-                        }
-                    }
-                    return false; 
-                }
-                else
-                {
-                    int index = currChar - 'a';
-                    if(currNode.Children[index] == null)
-                    {
-                        return false;
-                    }
-
-                    currNode = currNode.Children[index];
-                }
-            }
-
-            return currNode.IsEndWord;
-        }
-    }
-
-    public class TrieNode
-    {
-        public bool IsEndWord { get; set; }
-        public TrieNode[]  Children{ get; set; }
-
-        public TrieNode()
-        {
-            IsEndWord = false;
-            Children = new TrieNode[26];
-        }
-    }
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)
 `````
